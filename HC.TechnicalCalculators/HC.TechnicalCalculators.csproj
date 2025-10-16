@@ -8,11 +8,9 @@
     <Title>HC.TechnicalCalculators</Title>
     <PackageReadmeFile></PackageReadmeFile>
     <NuGetAuditMode>all</NuGetAuditMode>
-    <Company>HC</Company>
+    <Company></Company>
     <!-- Version will be set dynamically by build pipeline -->
     <PackageId>HC.TechnicalCalculators</PackageId>
-    <PackageOutputPath>D:\SilverMustangTrading\Local NugetPackages</PackageOutputPath>
-    <Version>1.0.1.4</Version>
   </PropertyGroup>
 
   <ItemGroup>
