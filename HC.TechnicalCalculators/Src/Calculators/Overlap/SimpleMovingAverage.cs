@@ -1,0 +1,76 @@
+using HC.TechnicalCalculators.Src.Calculators;
+using HC.TechnicalCalculators.Src.Models;
+using TALib;
+
+namespace HC.TechnicalCalculators.Src.Calculators.Overlap
+{
+    /// <summary>
+    /// Simple Moving Average (SMA) Calculator
+    /// Time Complexity: O(n) where n is the number of price data points
+    /// Space Complexity: O(n) for output storage, O(1) for algorithm computation
+    /// </summary>
+    public class SimpleMovingAverage : BaseCalculator
+    {
+        private const int MIN_PERIOD = 2;
+        private const int MAX_PERIOD = 200;
+        private const int DEFAULT_PERIOD = 20;
+
+        public SimpleMovingAverage(Dictionary<string, string> para, string name) : base(name, para)
+        {
+            ValidateParameters();
+        }
+
+        private void ValidateParameters()
+        {
+            if (!parameters.ContainsKey(nameof(ParameterNamesEnum.Period)))
+            {
+                parameters[nameof(ParameterNamesEnum.Period)] = DEFAULT_PERIOD.ToString();
+            }
+
+            if (!int.TryParse(parameters[nameof(ParameterNamesEnum.Period)], out int period) ||
+                period < MIN_PERIOD || period > MAX_PERIOD)
+            {
+                throw new ArgumentException($"Period must be between {MIN_PERIOD} and {MAX_PERIOD}.");
+            }
+        }
+        protected override CalculatorResults CalculateInternal(double[,] prices)
+        {
+            var period = int.Parse(parameters[nameof(ParameterNamesEnum.Period)]);
+
+            int outBegIdx, outNbElement;
+            double[] movingAvg = new double[Close.Length];
+
+            var retCode = Core.Sma(Close, 0, Close.Length - 1, movingAvg, out outBegIdx, out outNbElement, period);
+            ValidateTALibResult(retCode, nameof(CalculatorNameEnum.SMA));
+
+            var results = new Dictionary<long, KeyValuePair<string, double>[]>();
+
+            for (int i = outBegIdx; i < outBegIdx + outNbElement; i++)
+            {
+                long timestamp = (long)prices[i, 0];
+                results[timestamp] = new KeyValuePair<string, double>[]
+                {
+                    new KeyValuePair<string, double>(nameof(TechnicalNamesEnum.MOVINGAVERAGE), movingAvg[i - outBegIdx])
+                };
+            }
+
+            return new CalculatorResults
+            {
+                Name = _name,
+                Results = results.OrderByDescending(x => x.Key).ToDictionary(x => x.Key, x => x.Value)
+            };
+        }
+
+        public static IReadOnlyList<string> GetTechnicalIndicatorNames()
+        {
+            return new string[] { nameof(TechnicalNamesEnum.MOVINGAVERAGE) };
+        }
+        public static Dictionary<string, (double Min, double Max, ParameterValueTypeEnum valueType)> GetParameterConstraints()
+        {
+            return new Dictionary<string, (double Min, double Max, ParameterValueTypeEnum valueType)>
+            {
+                { nameof(ParameterNamesEnum.Period), (MIN_PERIOD, MAX_PERIOD, ParameterValueTypeEnum.INT) }
+            };
+        }
+    }
+}

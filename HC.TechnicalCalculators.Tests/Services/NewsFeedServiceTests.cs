@@ -1,0 +1,466 @@
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using Moq;
+using Moq.Protected;
+using Newtonsoft.Json;
+using HC.TechnicalCalculators.Src.Services;
+using HC.TechnicalCalculators.Src.Security;
+using HC.TechnicalCalculators.Src.Interfaces;
+using HC.TechnicalCalculators.Src.Models;
+using System.Net;
+
+namespace HC.TechnicalCalculators.Tests.Services
+{
+    public class SecureNewsFeedServiceTests
+    {
+        private readonly Mock<SecureHttpClientFactory> _mockHttpClientFactory;
+        private readonly Mock<IOptions<SecureNewsFeedOptions>> _mockOptions;
+        private readonly Mock<ILogger<NewsFeedService>> _mockLogger;
+        private readonly Mock<ISecureDataService> _mockSecureDataService;
+        private readonly Mock<IInputValidationService> _mockValidationService;
+        private readonly SecureNewsFeedOptions _options;
+        private readonly Mock<HttpMessageHandler> _mockHttpMessageHandler;
+
+        public SecureNewsFeedServiceTests()
+        {
+            _mockHttpClientFactory = new Mock<SecureHttpClientFactory>();
+            _mockOptions = new Mock<IOptions<SecureNewsFeedOptions>>();
+            _mockLogger = new Mock<ILogger<NewsFeedService>>();
+            _mockSecureDataService = new Mock<ISecureDataService>();
+            _mockValidationService = new Mock<IInputValidationService>();
+            _mockHttpMessageHandler = new Mock<HttpMessageHandler>();
+
+            _options = new SecureNewsFeedOptions
+            {
+                ApiKey = "test-api-key",
+                NewsApiEndpoint = "https://api.test.com",
+                CacheTimeMinutes = 30
+            };
+
+            _mockOptions.Setup(o => o.Value).Returns(_options);
+
+            // Set up HttpClient factory to return a client with our mocked handler
+            var httpClient = new HttpClient(_mockHttpMessageHandler.Object)
+            {
+                BaseAddress = new Uri("https://api.test.com")
+            };
+
+            _mockHttpClientFactory
+                .Setup(factory => factory.CreateSecureClient())
+                .Returns(httpClient);
+
+            // Setup validation service to return valid for test symbols
+            _mockValidationService.Setup(v => v.IsValidSymbol(It.IsAny<string>())).Returns(true);
+        }
+
+        private void SetupHttpClientMock(HttpStatusCode statusCode, object? content = null)
+        {
+            var jsonContent = content != null ? JsonConvert.SerializeObject(content) : "";
+
+            _mockHttpMessageHandler
+                .Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.IsAny<HttpRequestMessage>(),
+                    ItExpr.IsAny<CancellationToken>()
+                )
+                .ReturnsAsync(new HttpResponseMessage
+                {
+                    StatusCode = statusCode,
+                    Content = new StringContent(jsonContent)
+                });
+        }
+
+        [Fact(Skip = "Work in progress")]
+        public void Constructor_ShouldCreateInstance_WithValidParameters()
+        {
+            // Act
+            var service = new NewsFeedService(_mockHttpClientFactory.Object, _mockOptions.Object, _mockLogger.Object, 
+                _mockSecureDataService.Object, _mockValidationService.Object);
+
+            // Assert
+            Assert.NotNull(service);
+        }
+
+        [Fact(Skip = "Work in progress")]
+        public async Task GetNewsForSymbol_ShouldRefreshCache_WhenCacheExpired()
+        {
+            // Arrange
+            SetupHttpClientMock(HttpStatusCode.OK, new
+            {
+                Articles = new List<NewsItem>
+                {
+                    new NewsItem
+                    {
+                        Id = "1",
+                        Title = "Test News",
+                        PublishedAt = DateTime.UtcNow,
+                        RelatedSymbols = new List<string> { "AAPL" },
+                        SentimentScore = 0.5
+                    }
+                },
+                TotalResults = 1
+            });
+
+            var service = new NewsFeedService(_mockHttpClientFactory.Object, _mockOptions.Object, _mockLogger.Object, _mockSecureDataService.Object, _mockValidationService.Object);
+
+            // Act
+            var result = await service.GetNewsForSymbol("AAPL", DateTime.UtcNow.AddDays(-1), DateTime.UtcNow);
+
+            // Assert
+            _mockHttpMessageHandler.Protected().Verify(
+                "SendAsync",
+                Times.Once(),
+                ItExpr.Is<HttpRequestMessage>(req =>
+                    req.Method == HttpMethod.Get &&
+                    req.RequestUri != null &&
+                    req.RequestUri.ToString().Contains("/market-news")),
+                ItExpr.IsAny<CancellationToken>()
+            );
+
+            Assert.Single(result);
+            Assert.Equal("Test News", result[0].Title);
+        }
+
+        [Fact(Skip = "Work in progress")]
+        public async Task GetNewsForSymbol_ShouldNotRefreshCache_WhenCacheIsValid()
+        {
+            // Arrange
+            SetupHttpClientMock(HttpStatusCode.OK, new
+            {
+                Articles = new List<NewsItem>
+                {
+                    new NewsItem
+                    {
+                        Id = "1",
+                        Title = "Test News",
+                        PublishedAt = DateTime.UtcNow,
+                        RelatedSymbols = new List<string> { "AAPL" },
+                        SentimentScore = 0.5
+                    }
+                },
+                TotalResults = 1
+            });
+
+            var service = new NewsFeedService(_mockHttpClientFactory.Object, _mockOptions.Object, _mockLogger.Object, _mockSecureDataService.Object, _mockValidationService.Object);
+
+            // First call to populate cache
+            await service.GetNewsForSymbol("AAPL", DateTime.UtcNow.AddDays(-1), DateTime.UtcNow);
+
+            // Reset the mock to verify it's not called again
+            _mockHttpMessageHandler.Reset();
+            SetupHttpClientMock(HttpStatusCode.OK, new { Articles = new List<NewsItem>(), TotalResults = 0 });
+
+            // Act - second call should use cache
+            var result = await service.GetNewsForSymbol("AAPL", DateTime.UtcNow.AddDays(-1), DateTime.UtcNow);
+
+            // Assert
+            _mockHttpMessageHandler.Protected().Verify(
+                "SendAsync",
+                Times.Never(),
+                ItExpr.IsAny<HttpRequestMessage>(),
+                ItExpr.IsAny<CancellationToken>()
+            );
+
+            Assert.Single(result);
+            Assert.Equal("Test News", result[0].Title);
+        }
+
+        [Fact (Skip ="Work in progress")]
+        public async Task GetNewsForSymbol_ShouldFilterByDateRange()
+        {
+            // Arrange
+            var now = DateTime.UtcNow;
+            SetupHttpClientMock(HttpStatusCode.OK, new
+            {
+                Articles = new List<NewsItem>
+                {
+                    new NewsItem
+                    {
+                        Id = "1",
+                        Title = "Old News",
+                        PublishedAt = now.AddDays(-5),
+                        RelatedSymbols = new List<string> { "AAPL" },
+                        SentimentScore = 0.5
+                    },
+                    new NewsItem
+                    {
+                        Id = "2",
+                        Title = "Recent News",
+                        PublishedAt = now.AddHours(-1),
+                        RelatedSymbols = new List<string> { "AAPL" },
+                        SentimentScore = 0.7
+                    }
+                },
+                TotalResults = 2
+            });
+
+            var service = new NewsFeedService(_mockHttpClientFactory.Object, _mockOptions.Object, _mockLogger.Object, _mockSecureDataService.Object, _mockValidationService.Object);
+
+            // Act
+            var result = await service.GetNewsForSymbol("AAPL", now.AddDays(-2), now);
+
+            // Assert
+            Assert.Single(result);
+            Assert.Equal("Recent News", result[0].Title);
+        }
+
+        [Fact(Skip = "Work in progress")]
+        public async Task GetNewsForSymbol_ShouldReturnEmptyList_WhenNoNewsForSymbol()
+        {
+            // Arrange
+            SetupHttpClientMock(HttpStatusCode.OK, new
+            {
+                Articles = new List<NewsItem>
+                {
+                    new NewsItem
+                    {
+                        Id = "1",
+                        Title = "Test News",
+                        PublishedAt = DateTime.UtcNow,
+                        RelatedSymbols = new List<string> { "MSFT" }, // Different symbol
+                        SentimentScore = 0.5
+                    }
+                },
+                TotalResults = 1
+            });
+
+            var service = new NewsFeedService(_mockHttpClientFactory.Object, _mockOptions.Object, _mockLogger.Object, _mockSecureDataService.Object, _mockValidationService.Object);
+
+            // Act
+            var result = await service.GetNewsForSymbol("AAPL", DateTime.UtcNow.AddDays(-1), DateTime.UtcNow);
+
+            // Assert
+            Assert.Empty(result);
+        }
+
+        [Fact(Skip = "Work in progress")]
+        public async Task GetNewsForSymbol_ShouldReturnEmptyList_WhenApiReturnsNull()
+        {
+            // Arrange
+            SetupHttpClientMock(HttpStatusCode.OK, null);
+
+            var service = new NewsFeedService(_mockHttpClientFactory.Object, _mockOptions.Object, _mockLogger.Object, _mockSecureDataService.Object, _mockValidationService.Object);
+
+            // Act
+            var result = await service.GetNewsForSymbol("AAPL", DateTime.UtcNow.AddDays(-1), DateTime.UtcNow);
+
+            // Assert
+            Assert.Empty(result);
+        }
+
+        [Fact(Skip = "Work in progress")]
+        public async Task GetNewsForSymbol_ShouldHandleApiException()
+        {
+            // Arrange
+            _mockHttpMessageHandler
+                .Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.IsAny<HttpRequestMessage>(),
+                    ItExpr.IsAny<CancellationToken>()
+                )
+                .ThrowsAsync(new HttpRequestException("API Error"));
+
+            var service = new NewsFeedService(_mockHttpClientFactory.Object, _mockOptions.Object, _mockLogger.Object, _mockSecureDataService.Object, _mockValidationService.Object);
+
+            // Act
+            var result = await service.GetNewsForSymbol("AAPL", DateTime.UtcNow.AddDays(-1), DateTime.UtcNow);
+
+            // Assert
+            Assert.Empty(result);
+            _mockLogger.Verify(
+                x => x.Log(
+                    LogLevel.Error,
+                    It.IsAny<EventId>(),
+                    It.IsAny<It.IsAnyType>(),
+                    It.IsAny<HttpRequestException>(),
+                    (Func<It.IsAnyType, Exception?, string>)It.IsAny<object>()
+                ),
+                Times.Once
+            );
+        }
+
+        [Fact(Skip = "Work in progress")]
+        public async Task RefreshNewsData_ShouldPopulateCache()
+        {
+            // Arrange
+            var now = DateTime.UtcNow;
+            SetupHttpClientMock(HttpStatusCode.OK, new
+            {
+                Articles = new List<NewsItem>
+                {
+                    new NewsItem
+                    {
+                        Id = "1",
+                        Title = "Apple News",
+                        PublishedAt = now,
+                        RelatedSymbols = new List<string> { "AAPL" },
+                        SentimentScore = 0.5
+                    },
+                    new NewsItem
+                    {
+                        Id = "2",
+                        Title = "Microsoft News",
+                        PublishedAt = now,
+                        RelatedSymbols = new List<string> { "MSFT" },
+                        SentimentScore = -0.2
+                    }
+                },
+                TotalResults = 2
+            });
+
+            var service = new NewsFeedService(_mockHttpClientFactory.Object, _mockOptions.Object, _mockLogger.Object, _mockSecureDataService.Object, _mockValidationService.Object);
+
+            // Act
+            await service.RefreshNewsData();
+            var appleNews = await service.GetNewsForSymbol("AAPL", now.AddMinutes(-5), now.AddMinutes(5));
+            var msftNews = await service.GetNewsForSymbol("MSFT", now.AddMinutes(-5), now.AddMinutes(5));
+
+            // Assert
+            Assert.Single(appleNews);
+            Assert.Equal("Apple News", appleNews[0].Title);
+
+            Assert.Single(msftNews);
+            Assert.Equal("Microsoft News", msftNews[0].Title);
+
+            _mockLogger.Verify(
+                x => x.Log(
+                    LogLevel.Information,
+                    It.IsAny<EventId>(),
+                    It.Is<It.IsAnyType>((v, t) => v != null && v.ToString()!.Contains("News data refreshed successfully")),
+                    It.IsAny<Exception>(),
+                    (Func<It.IsAnyType, Exception?, string>)It.IsAny<object>()
+                ),
+                Times.Once
+            );
+        }
+
+        [Fact(Skip = "Work in progress")]
+        public async Task RefreshNewsData_ShouldHandleArticlesWithNullRelatedSymbols()
+        {
+            // Arrange
+            SetupHttpClientMock(HttpStatusCode.OK, new
+            {
+                Articles = new List<NewsItem>
+                {
+                    new NewsItem
+                    {
+                        Id = "1",
+                        Title = "General News",
+                        PublishedAt = DateTime.UtcNow,
+                        RelatedSymbols = (List<string>?)null, // Using cast to make null explicit
+                        SentimentScore = 0.5
+                    }
+                },
+                TotalResults = 1
+            });
+
+            var service = new NewsFeedService(_mockHttpClientFactory.Object, _mockOptions.Object, _mockLogger.Object, _mockSecureDataService.Object, _mockValidationService.Object);
+
+            // Act & Assert (should not throw)
+            await service.RefreshNewsData();
+        }
+
+        [Fact(Skip = "Work in progress")]
+        public void GetSentimentScore_ShouldReturnZero_WhenNoNews()
+        {
+            // Arrange
+            var service = new NewsFeedService(_mockHttpClientFactory.Object, _mockOptions.Object, _mockLogger.Object, _mockSecureDataService.Object, _mockValidationService.Object);
+
+            // Act
+            var result = service.GetSentimentScore("UNKNOWN", DateTime.UtcNow.AddDays(-1), DateTime.UtcNow);
+
+            // Assert
+            Assert.Equal(0, result);
+        }
+
+        [Fact(Skip = "Work in progress")]
+        public async Task GetSentimentScore_ShouldCalculateWeightedAverage()
+        {
+            // Arrange
+            var now = DateTime.UtcNow;
+            var twoHoursAgo = now.AddHours(-2);
+            var oneHourAgo = now.AddHours(-1);
+
+            SetupHttpClientMock(HttpStatusCode.OK, new
+            {
+                Articles = new List<NewsItem>
+                {
+                    new NewsItem
+                    {
+                        Id = "1",
+                        Title = "Older News",
+                        PublishedAt = twoHoursAgo,
+                        RelatedSymbols = new List<string> { "AAPL" },
+                        SentimentScore = 1.0 // Very positive
+                    },
+                    new NewsItem
+                    {
+                        Id = "2",
+                        Title = "Recent News",
+                        PublishedAt = oneHourAgo,
+                        RelatedSymbols = new List<string> { "AAPL" },
+                        SentimentScore = -1.0 // Very negative
+                    }
+                },
+                TotalResults = 2
+            });
+
+            var service = new NewsFeedService(_mockHttpClientFactory.Object, _mockOptions.Object, _mockLogger.Object, _mockSecureDataService.Object, _mockValidationService.Object);
+            await service.RefreshNewsData();
+
+            // Act
+            var result = service.GetSentimentScore("AAPL", twoHoursAgo.AddMinutes(-10), now);
+
+            // Assert
+            // The more recent negative news should have more weight
+            Assert.True(result < 0, "Sentiment should be negative as the more recent news is negative");
+
+            // But the older positive news still contributes, so it shouldn't be -1
+            Assert.True(result > -1, "Sentiment should not be -1 as the older news moderates it");
+        }
+
+        [Fact(Skip = "Work in progress")]
+        public async Task GetSentimentScore_ShouldFilterByTimeframe()
+        {
+            // Arrange
+            var now = DateTime.UtcNow;
+            var oldNews = now.AddDays(-5);
+            var recentNews = now.AddHours(-1);
+
+            SetupHttpClientMock(HttpStatusCode.OK, new
+            {
+                Articles = new List<NewsItem>
+                {
+                    new NewsItem
+                    {
+                        Id = "1",
+                        Title = "Old News",
+                        PublishedAt = oldNews,
+                        RelatedSymbols = new List<string> { "AAPL" },
+                        SentimentScore = -0.8 // Very negative
+                    },
+                    new NewsItem
+                    {
+                        Id = "2",
+                        Title = "Recent News",
+                        PublishedAt = recentNews,
+                        RelatedSymbols = new List<string> { "AAPL" },
+                        SentimentScore = 0.8 // Very positive
+                    }
+                },
+                TotalResults = 2
+            });
+
+            var service = new NewsFeedService(_mockHttpClientFactory.Object, _mockOptions.Object, _mockLogger.Object, _mockSecureDataService.Object, _mockValidationService.Object);
+            await service.RefreshNewsData();
+
+            // Act - only include recent news
+            var result = service.GetSentimentScore("AAPL", now.AddDays(-2), now);
+
+            // Assert
+            Assert.Equal(0.8, result); // Should only include the positive recent news
+        }
+    }
+}

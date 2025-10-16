@@ -1,0 +1,80 @@
+trigger:
+- main
+
+pr:
+- main
+
+pool:
+  vmImage: 'windows-latest'
+
+variables:
+  buildConfiguration: 'Release'
+  majorVersion: '1'
+  minorVersion: '0'
+  patchVersion: '0'
+  ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/main') }}:
+    versionSuffix: ''
+    packageVersion: '$(majorVersion).$(minorVersion).$(patchVersion).$(Build.BuildId)'
+  ${{ else }}:
+    versionSuffix: '-preview'
+    packageVersion: '$(majorVersion).$(minorVersion).$(patchVersion).$(Build.BuildId)$(versionSuffix)'
+
+steps:
+- task: PowerShell@2
+  displayName: 'Set Package Version'
+  inputs:
+    targetType: 'inline'
+    script: |
+      Write-Host "Setting package version to: $(packageVersion)"
+      Write-Host "##vso[task.setvariable variable=PackageVersion]$(packageVersion)"
+      Write-Host "Build ID: $(Build.BuildId)"
+      Write-Host "Source Branch: $(Build.SourceBranch)"
+
+- task: UseDotNet@2
+  displayName: 'Install .NET Core SDK'
+  inputs:
+    packageType: 'sdk'
+    version: '8.x'
+    installationPath: $(Agent.ToolsDirectory)/dotnet
+
+- task: DotNetCoreCLI@2
+  displayName: 'Restore'
+  inputs:
+    command: 'restore'
+    projects: '**/*.csproj'
+
+- task: DotNetCoreCLI@2
+  displayName: 'Build Project'
+  inputs:
+    command: 'build'
+    projects: '**/*.csproj'
+    arguments: '--configuration $(buildConfiguration) -p:Version=$(PackageVersion) -p:AssemblyVersion=$(majorVersion).$(minorVersion).$(patchVersion).0 -p:FileVersion=$(majorVersion).$(minorVersion).$(patchVersion).$(Build.BuildId)'
+
+- task: DotNetCoreCLI@2
+  displayName: 'Run Tests'
+  inputs:
+    command: 'test'
+    projects: '**/*.Tests.csproj'
+
+- task: PublishTestResults@2
+  displayName: 'Publish Test Results'
+  inputs:
+    testResultsFormat: 'VSTest'
+    testResultsFiles: '$(Agent.TempDirectory)/TestResults/*.trx'
+    mergeTestResults: true
+    failTaskOnFailedTests: true
+
+- task: DotNetCoreCLI@2
+  displayName: 'Pack'
+  inputs:
+    command: 'pack'
+    packagesToPack: '**/*.csproj'
+    outputDir: '$(Build.ArtifactStagingDirectory)'
+    arguments: '--configuration $(buildConfiguration) -p:PackageVersion=$(PackageVersion) -p:Version=$(PackageVersion)'
+    
+- task: DotNetCoreCLI@2
+  inputs:
+    command: 'push'
+    packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
+    nuGetFeedType: 'internal'
+    publishVstsFeed: '$(publishVstsFeedID)'

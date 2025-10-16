@@ -1,0 +1,82 @@
+using HC.TechnicalCalculators.Src.Calculators;
+using HC.TechnicalCalculators.Src.Models;
+using TALib;
+
+namespace HC.TechnicalCalculators.Src.Calculators.Momentum
+{
+    public class DmiCalculator : BaseCalculator
+    {
+        private const int MIN_PERIOD = 2;
+        private const int MAX_PERIOD = 100;
+        private const int DEFAULT_PERIOD = 14;
+
+        public DmiCalculator(Dictionary<string, string> para, string name) : base(name, para)
+        {
+            ValidateParameters();
+        }
+
+        private void ValidateParameters()
+        {
+            if (!parameters.ContainsKey(nameof(ParameterNamesEnum.Period)))
+            {
+                parameters[nameof(ParameterNamesEnum.Period)] = DEFAULT_PERIOD.ToString();
+            }
+
+            if (!int.TryParse(parameters[nameof(ParameterNamesEnum.Period)], out int period) ||
+                period < MIN_PERIOD || period > MAX_PERIOD)
+            {
+                throw new ArgumentException($"Period must be between {MIN_PERIOD} and {MAX_PERIOD}.");
+            }
+        }
+        protected override CalculatorResults CalculateInternal(double[,] prices)
+        {
+
+            var period = int.Parse(parameters[nameof(ParameterNamesEnum.Period)]);
+
+            int outBegIdx, outNbElement;
+            double[] plusDi = new double[High.Length];
+            double[] minusDi = new double[High.Length];
+            double[] adx = new double[High.Length];
+
+            var retCode1 = Core.PlusDI(High, Low, Close, 0, High.Length - 1, plusDi, out outBegIdx, out outNbElement, period);
+            ValidateTALibResult(retCode1, "PlusDI");
+            var retCode2 = Core.MinusDI(High, Low, Close, 0, High.Length - 1, minusDi, out outBegIdx, out outNbElement, period);
+            ValidateTALibResult(retCode2, "MinusDI");
+            var retCode3 = Core.Adx(High, Low, Close, 0, High.Length - 1, adx, out outBegIdx, out outNbElement, period);
+            ValidateTALibResult(retCode3, nameof(CalculatorNameEnum.ADX));
+
+            var results = new Dictionary<long, KeyValuePair<string, double>[]>();
+
+            for (int i = outBegIdx; i < outBegIdx + outNbElement; i++)
+            {
+                long timestamp = (long)prices[i, 0];
+                results[timestamp] = new KeyValuePair<string, double>[]
+                {
+                    new KeyValuePair<string, double>(nameof(TechnicalNamesEnum.PLUSDI), plusDi[i]),
+                    new KeyValuePair<string, double>(nameof(TechnicalNamesEnum.MINUSDI), minusDi[i]),
+                    new KeyValuePair<string, double>(nameof(TechnicalNamesEnum.ADX), adx[i])
+                };
+            }
+            return new CalculatorResults
+            {
+                Name = _name,
+                Results = results.OrderByDescending(x => x.Key).ToDictionary(x => x.Key, x => x.Value)
+            };
+        }
+        public static IReadOnlyList<string> GetTechnicalIndicatorNames()
+        {
+            return new string[] {
+                nameof(TechnicalNamesEnum.PLUSDI),
+                nameof(TechnicalNamesEnum.MINUSDI),
+                nameof(TechnicalNamesEnum.ADX)};
+        }
+        public static Dictionary<string, (double Min, double Max, ParameterValueTypeEnum valueType)> GetParameterConstraints()
+        {
+            return new Dictionary<string, (double Min, double Max, ParameterValueTypeEnum valueType)>
+            {
+                { nameof(ParameterNamesEnum.Period), (MIN_PERIOD, MAX_PERIOD, ParameterValueTypeEnum.INT) }
+            };
+        }
+    }
+}
+

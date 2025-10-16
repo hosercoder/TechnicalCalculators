@@ -1,0 +1,42 @@
+namespace HC.TechnicalCalculators.Src.Models
+{
+    public enum CalculatorNameEnum
+    {
+        ADX,
+        ADXR,
+        APO,
+        AROON,
+        ATR,
+        AVGPRICE,
+        BBANDS,
+        CHAIKINADLINE,
+        CHAIKINADOSCILLATOR,
+        DEMA,
+        DM,
+        DMI,
+        DX,
+        EMA,
+        KAMA,
+        MA,
+        MACD,
+        MAMA,
+        MFI,
+        MOM,
+        NATR,
+        NEWSSENTIMENT,
+        OBV,
+        PPO,
+        PSAR,
+        ROC,
+        RSI,
+        SMA,
+        STOCH,
+        TEMA,
+        TEST,
+        TMA,
+        TRANGE,
+        ULTOSC,
+        WCLPRICE,
+        WMA
+    }
+}

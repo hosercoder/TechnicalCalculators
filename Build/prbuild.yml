@@ -1,0 +1,92 @@
+trigger:
+- main
+pr:
+- main
+
+pool:
+  vmImage: 'windows-latest'
+
+variables:
+  buildConfiguration: 'Release'
+  majorVersion: '1'
+  minorVersion: '0'
+  patchVersion: '0'
+  packageVersion: '$(majorVersion).$(minorVersion).$(patchVersion).$(Build.BuildId)-preview'
+
+steps:
+- task: PowerShell@2
+  displayName: 'Set Package Version for PR'
+  inputs:
+    targetType: 'inline'
+    script: |
+      Write-Host "Setting PR package version to: $(packageVersion)"
+      Write-Host "##vso[task.setvariable variable=PackageVersion]$(packageVersion)"
+      Write-Host "Build ID: $(Build.BuildId)"
+      Write-Host "Source Branch: $(Build.SourceBranch)"
+
+- task: SonarCloudPrepare@3
+  displayName: 'Sonar Cloud Prepare'
+  inputs:
+    SonarQube: 'SonarQube'
+    organization: 'tdatsmor'
+    scannerMode: 'dotnet'
+    projectKey: 'MT.TechnicalCalculators'
+    projectName: 'MT.TechnicalCalculators'
+- task: UseDotNet@2
+  displayName: 'Install .NET Core SDK'
+  inputs:
+    version: 8.x
+    performMultiLevelLookup: true
+
+- task: DotNetCoreCLI@2
+  displayName: 'Restore'
+  inputs:
+    command: 'restore'
+    projects: '**/*.csproj'
+
+- task: DotNetCoreCLI@2
+  displayName: 'Build Project'
+  inputs:
+    command: 'build'
+    projects: '**/*.csproj'
+    arguments: '--configuration $(buildConfiguration) -p:Version=$(PackageVersion) -p:AssemblyVersion=$(majorVersion).$(minorVersion).$(patchVersion).0 -p:FileVersion=$(majorVersion).$(minorVersion).$(patchVersion).$(Build.BuildId)'
+
+- task: DotNetCoreCLI@2
+  displayName: 'Run Tests'
+  inputs:
+    command: 'test'
+    projects: '**/*.Tests.csproj'
+
+- task: DotNetCoreCLI@2
+  displayName: 'Pack for Validation'
+  inputs:
+    command: 'pack'
+    packagesToPack: '**/*.csproj'
+    outputDir: '$(Build.ArtifactStagingDirectory)'
+    arguments: '--configuration $(buildConfiguration) -p:PackageVersion=$(PackageVersion) -p:Version=$(PackageVersion)'
+
+- task: SonarCloudAnalyze@3
+  displayName: 'Sonar Cloud Analyze'
+  inputs:
+    jdkversion: 'JAVA_HOME_17_X64'
+
+- task: SonarCloudPublish@3
+  displayName: 'Sonar Cloud Publish'
+  inputs:
+    pollingTimeoutSec: '300'
+
+- task: PowerShell@2
+  displayName: 'Create Pull Request'
+  condition: succeeded()  # Proceeds only if the quality gate passed
+  inputs:
+    targetType: 'inline'
+    script: |
+      Write-Output "Quality gate passed. Creating PR."
+
+- task: PublishTestResults@2
+  displayName: 'Publish Test Results'
+  inputs:
+    testResultsFormat: 'VSTest'
+    testResultsFiles: '$(Agent.TempDirectory)/TestResults/*.trx'
+    mergeTestResults: true
+    failTaskOnFailedTests: true
