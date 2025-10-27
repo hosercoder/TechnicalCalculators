@@ -1,7 +1,6 @@
 using HC.TechnicalCalculators.Src.Calculators.Momentum;
 using HC.TechnicalCalculators.Src.Models;
 using HC.TechnicalCalculators.Tests.Helpers;
-using System;
 
 namespace HC.TechnicalCalculators.Tests.Calculators.Momentum
 {

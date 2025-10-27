@@ -1,10 +1,10 @@
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using HC.TechnicalCalculators.Src.Interfaces;
 using HC.TechnicalCalculators.Src.Models;
 using HC.TechnicalCalculators.Src.Security;
-using System.Net.Http.Json;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using System.Collections.Concurrent;
+using System.Net.Http.Json;
 
 namespace HC.TechnicalCalculators.Src.Services
 {
@@ -147,7 +147,7 @@ namespace HC.TechnicalCalculators.Src.Services
                 }
 
                 using var client = _httpClientFactory.CreateSecureClient();
-                
+
                 // Add protected API key
                 var protectedApiKey = _secureDataService.UnprotectString(_options.ApiKey);
                 client.DefaultRequestHeaders.Add("x-api-key", protectedApiKey);
@@ -216,7 +216,7 @@ namespace HC.TechnicalCalculators.Src.Services
         {
             var now = DateTime.UtcNow;
             var key = $"{symbol}_{now:yyyy-MM-dd-HH-mm-ss}";
-            
+
             // Clean old entries (older than 1 second)
             var expiredKeys = _rateLimitTracker
                 .Where(kvp => now - kvp.Value > TimeSpan.FromSeconds(1))
@@ -229,8 +229,8 @@ namespace HC.TechnicalCalculators.Src.Services
             }
 
             // Count requests in the current second
-            var recentRequests = _rateLimitTracker.Count(kvp => 
-                kvp.Key.StartsWith($"{symbol}_") && 
+            var recentRequests = _rateLimitTracker.Count(kvp =>
+                kvp.Key.StartsWith($"{symbol}_") &&
                 now - kvp.Value <= TimeSpan.FromSeconds(1));
 
             if (recentRequests >= _options.RateLimitPerSecond)

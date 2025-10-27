@@ -1,4 +1,3 @@
-using HC.TechnicalCalculators.Src.Calculators;
 using HC.TechnicalCalculators.Src.Models;
 using TALib;
 
@@ -98,7 +97,7 @@ namespace HC.TechnicalCalculators.Src.Calculators.Momentum
         }
         public static IReadOnlyList<string> GetTechnicalIndicatorNames()
         {
-            return new string[] { 
+            return new string[] {
                 nameof(TechnicalNamesEnum.PPO),
                 nameof(TechnicalNamesEnum.PPOHIST),
                 nameof(TechnicalNamesEnum.PPOSIGNAL)

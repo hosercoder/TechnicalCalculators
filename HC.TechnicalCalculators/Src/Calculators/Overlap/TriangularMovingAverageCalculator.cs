@@ -1,4 +1,3 @@
-using HC.TechnicalCalculators.Src.Calculators;
 using HC.TechnicalCalculators.Src.Models;
 
 namespace HC.TechnicalCalculators.Src.Calculators.Overlap

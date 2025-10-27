@@ -1,4 +1,3 @@
-using HC.TechnicalCalculators.Src.Calculators;
 using HC.TechnicalCalculators.Src.Interfaces;
 using HC.TechnicalCalculators.Src.Models;
 using HC.TechnicalCalculators.Src.Security;
@@ -59,7 +58,7 @@ namespace HC.TechnicalCalculators.Src.Calculators.News
         }
         public static IReadOnlyList<string> GetRequiredParamNames()
         {
-            return new string[] { nameof(ParameterNamesEnum.Symbol)};
+            return new string[] { nameof(ParameterNamesEnum.Symbol) };
         }
 
         public static Dictionary<string, (double Min, double Max, ParameterValueTypeEnum valueType)> GetParameterConstraints()

@@ -1,7 +1,6 @@
+using HC.TechnicalCalculators.Src.Security;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
-using HC.TechnicalCalculators.Src.Security;
-using Xunit;
 
 namespace HC.TechnicalCalculators.Tests.Security
 {
@@ -46,7 +45,7 @@ namespace HC.TechnicalCalculators.Tests.Security
             var longString = new string('a', 15);
 
             // Act & Assert
-            var exception = Assert.Throws<ArgumentException>(() => 
+            var exception = Assert.Throws<ArgumentException>(() =>
                 _validationService.ValidateStringLength(longString, 10, "test"));
             Assert.Contains("exceeds maximum length", exception.Message);
             Assert.Contains("10", exception.Message);
@@ -59,7 +58,7 @@ namespace HC.TechnicalCalculators.Tests.Security
         public void ValidateStringLength_WithZeroMaxLength_ShouldThrowArgumentException()
         {
             // Act & Assert
-            var exception = Assert.Throws<ArgumentException>(() => 
+            var exception = Assert.Throws<ArgumentException>(() =>
                 _validationService.ValidateStringLength("test", 0, "test"));
             Assert.Contains("exceeds maximum length", exception.Message);
         }
@@ -317,7 +316,7 @@ namespace HC.TechnicalCalculators.Tests.Security
         public void ValidateArraySize_WithNullArray_ShouldThrowArgumentNullException()
         {
             // Act & Assert
-            var exception = Assert.Throws<ArgumentNullException>(() => 
+            var exception = Assert.Throws<ArgumentNullException>(() =>
                 _validationService.ValidateArraySize(null!, 100));
             Assert.Equal("array", exception.ParamName);
         }
@@ -332,7 +331,7 @@ namespace HC.TechnicalCalculators.Tests.Security
             var largeArray = new double[15, 6];
 
             // Act & Assert
-            var exception = Assert.Throws<ArgumentException>(() => 
+            var exception = Assert.Throws<ArgumentException>(() =>
                 _validationService.ValidateArraySize(largeArray, 10));
             Assert.Contains("Array size", exception.Message);
             Assert.Contains("exceeds maximum", exception.Message);
@@ -362,7 +361,7 @@ namespace HC.TechnicalCalculators.Tests.Security
         public void Constructor_WithNullLogger_ShouldThrowArgumentNullException()
         {
             // Act & Assert
-            var exception = Assert.Throws<ArgumentNullException>(() => 
+            var exception = Assert.Throws<ArgumentNullException>(() =>
                 new InputValidationService(null!));
             Assert.Equal("Logger Must be provided", exception.ParamName);
         }

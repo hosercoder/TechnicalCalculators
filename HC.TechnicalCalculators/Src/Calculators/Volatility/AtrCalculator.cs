@@ -1,4 +1,3 @@
-using HC.TechnicalCalculators.Src.Calculators;
 using HC.TechnicalCalculators.Src.Models;
 using TALib;
 
@@ -41,7 +40,7 @@ namespace HC.TechnicalCalculators.Src.Calculators.Volatility
         {
             var period = int.Parse(parameters[nameof(ParameterNamesEnum.Period)]);
 
-            if(prices.GetLength(0) < period)
+            if (prices.GetLength(0) < period)
             {
                 throw new ArgumentException($"Not enough data points for ATR calculation. Minimum required: {period}");
             }

@@ -1,11 +1,8 @@
 using HC.TechnicalCalculators.Src.Calculators;
-using HC.TechnicalCalculators.Src.Interfaces;
 using HC.TechnicalCalculators.Src.Models;
 using HC.TechnicalCalculators.Src.Security;
 using HC.TechnicalCalculators.Tests.Helpers;
-using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
-using Xunit;
 
 namespace HC.TechnicalCalculators.Tests.Calculators
 {
@@ -46,7 +43,7 @@ namespace HC.TechnicalCalculators.Tests.Calculators
             var parameters = new Dictionary<string, string>();
 
             // Act & Assert
-            var exception = Assert.Throws<ArgumentNullException>(() => 
+            var exception = Assert.Throws<ArgumentNullException>(() =>
                 new SimpleTestBaseCalculator("TestCalc", parameters, null!));
             Assert.Equal("validationService", exception.ParamName);
         }
@@ -55,7 +52,7 @@ namespace HC.TechnicalCalculators.Tests.Calculators
         public void Constructor_WithNullParameters_ShouldThrowArgumentNullException()
         {
             // Act & Assert
-            var exception = Assert.Throws<ArgumentNullException>(() => 
+            var exception = Assert.Throws<ArgumentNullException>(() =>
                 new SimpleTestBaseCalculator("TestCalc", null!, _mockValidationService.Object));
             Assert.Equal("para", exception.ParamName);
             Assert.Contains("Parameters dictionary cannot be null", exception.Message);
@@ -68,17 +65,17 @@ namespace HC.TechnicalCalculators.Tests.Calculators
             var parameters = new Dictionary<string, string>();
 
             // Act & Assert - Null name
-            var exception1 = Assert.Throws<ArgumentException>(() => 
+            var exception1 = Assert.Throws<ArgumentException>(() =>
                 new SimpleTestBaseCalculator(null!, parameters, _mockValidationService.Object));
             Assert.Equal("name", exception1.ParamName);
 
             // Act & Assert - Empty name
-            var exception2 = Assert.Throws<ArgumentException>(() => 
+            var exception2 = Assert.Throws<ArgumentException>(() =>
                 new SimpleTestBaseCalculator("", parameters, _mockValidationService.Object));
             Assert.Equal("name", exception2.ParamName);
 
             // Act & Assert - Whitespace name
-            var exception3 = Assert.Throws<ArgumentException>(() => 
+            var exception3 = Assert.Throws<ArgumentException>(() =>
                 new SimpleTestBaseCalculator("   ", parameters, _mockValidationService.Object));
             Assert.Equal("name", exception3.ParamName);
         }
@@ -87,8 +84,8 @@ namespace HC.TechnicalCalculators.Tests.Calculators
         public void Constructor_WithNAParameter_ShouldSkipValidation()
         {
             // Arrange
-            var parameters = new Dictionary<string, string> 
-            { 
+            var parameters = new Dictionary<string, string>
+            {
                 { nameof(ParameterNamesEnum.NA), "ignored" },
                 { "valid", "parameter" }
             };
@@ -110,7 +107,7 @@ namespace HC.TechnicalCalculators.Tests.Calculators
             var parameters = new Dictionary<string, string> { { "", "value" } };
 
             // Act & Assert
-            var exception = Assert.Throws<ArgumentException>(() => 
+            var exception = Assert.Throws<ArgumentException>(() =>
                 new SimpleTestBaseCalculator("TestCalc", parameters, _mockValidationService.Object));
             Assert.Contains("Parameter key cannot be null or empty", exception.Message);
         }
@@ -140,7 +137,7 @@ namespace HC.TechnicalCalculators.Tests.Calculators
             var parameters = new Dictionary<string, string>();
             var calculator = new SimpleTestBaseCalculator("TestCalc", parameters, _mockValidationService.Object);
             var prices = Pricedata.GetPrices(10);
-            
+
             _mockValidationService.Setup(x => x.IsValidPriceData(It.IsAny<double[,]>())).Returns(false);
 
             // Act & Assert

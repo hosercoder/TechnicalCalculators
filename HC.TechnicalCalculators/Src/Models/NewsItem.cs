@@ -167,7 +167,7 @@ namespace HC.TechnicalCalculators.Src.Models
                 return null;
 
             // Basic URL validation and sanitization
-            if (Uri.TryCreate(url, UriKind.Absolute, out var uri) && 
+            if (Uri.TryCreate(url, UriKind.Absolute, out var uri) &&
                 (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps))
             {
                 return uri.ToString();

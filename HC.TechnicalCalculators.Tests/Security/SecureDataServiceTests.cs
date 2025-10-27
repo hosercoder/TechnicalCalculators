@@ -1,8 +1,6 @@
+using HC.TechnicalCalculators.Src.Security;
 using Microsoft.Extensions.Logging;
 using Moq;
-using HC.TechnicalCalculators.Src.Security;
-using System.Text;
-using Xunit;
 
 namespace HC.TechnicalCalculators.Tests.Security
 {
@@ -61,7 +59,7 @@ namespace HC.TechnicalCalculators.Tests.Security
             Assert.NotNull(result);
             Assert.NotEmpty(result);
             Assert.NotEqual(input, result);
-            
+
             // Should be valid base64
             var base64Bytes = Convert.FromBase64String(result);
             Assert.NotEmpty(base64Bytes);
@@ -102,10 +100,10 @@ namespace HC.TechnicalCalculators.Tests.Security
             var invalidBase64 = "This is not valid base64!";
 
             // Act & Assert
-            var exception = Assert.Throws<InvalidOperationException>(() => 
+            var exception = Assert.Throws<InvalidOperationException>(() =>
                 _secureDataService.UnprotectString(invalidBase64));
             Assert.Equal("Data unprotection failed", exception.Message);
-            
+
             // Verify error was logged
             _mockLogger.Verify(
                 x => x.Log(
@@ -234,7 +232,7 @@ namespace HC.TechnicalCalculators.Tests.Security
 
             // Assert
             Assert.NotEqual(result1, result2); // Should be different due to random IV
-            
+
             // But both should decrypt to the same original
             Assert.Equal(input, _secureDataService.UnprotectString(result1));
             Assert.Equal(input, _secureDataService.UnprotectString(result2));
@@ -252,7 +250,7 @@ namespace HC.TechnicalCalculators.Tests.Security
 
             // Assert
             Assert.NotEqual(result1, result2); // Should be different due to random IV
-            
+
             // But both should decrypt to the same original
             Assert.Equal(input, _secureDataService.UnprotectBytes(result1));
             Assert.Equal(input, _secureDataService.UnprotectBytes(result2));
@@ -279,7 +277,7 @@ namespace HC.TechnicalCalculators.Tests.Security
             var invalidData = new byte[] { 1, 2, 3 }; // Too short to contain valid IV + encrypted data
 
             // Act & Assert
-            var exception = Assert.ThrowsAny<Exception>(() => 
+            var exception = Assert.ThrowsAny<Exception>(() =>
                 _secureDataService.UnprotectBytes(invalidData));
             Assert.NotNull(exception);
         }

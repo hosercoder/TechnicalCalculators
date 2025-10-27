@@ -1,7 +1,6 @@
 using Microsoft.Extensions.Logging;
 using System.Security.Cryptography;
 using System.Text;
-using System.Text.Json;
 
 namespace HC.TechnicalCalculators.Src.Security
 {
@@ -118,10 +117,10 @@ namespace HC.TechnicalCalculators.Src.Security
 
             using var encryptor = aes.CreateEncryptor();
             using var ms = new MemoryStream();
-            
+
             // Write IV first
             ms.Write(aes.IV, 0, aes.IV.Length);
-            
+
             using (var cs = new CryptoStream(ms, encryptor, CryptoStreamMode.Write))
             {
                 cs.Write(data, 0, data.Length);
@@ -147,7 +146,7 @@ namespace HC.TechnicalCalculators.Src.Security
             using var ms = new MemoryStream(protectedData, iv.Length, protectedData.Length - iv.Length);
             using var cs = new CryptoStream(ms, decryptor, CryptoStreamMode.Read);
             using var result = new MemoryStream();
-            
+
             cs.CopyTo(result);
             return result.ToArray();
         }

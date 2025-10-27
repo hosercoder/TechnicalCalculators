@@ -1,12 +1,11 @@
+using HC.TechnicalCalculators.Src.Models;
+using HC.TechnicalCalculators.Src.Security;
+using HC.TechnicalCalculators.Src.Services;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
 using Moq.Protected;
 using Newtonsoft.Json;
-using HC.TechnicalCalculators.Src.Services;
-using HC.TechnicalCalculators.Src.Security;
-using HC.TechnicalCalculators.Src.Interfaces;
-using HC.TechnicalCalculators.Src.Models;
 using System.Net;
 
 namespace HC.TechnicalCalculators.Tests.Services
@@ -75,7 +74,7 @@ namespace HC.TechnicalCalculators.Tests.Services
         public void Constructor_ShouldCreateInstance_WithValidParameters()
         {
             // Act
-            var service = new NewsFeedService(_mockHttpClientFactory.Object, _mockOptions.Object, _mockLogger.Object, 
+            var service = new NewsFeedService(_mockHttpClientFactory.Object, _mockOptions.Object, _mockLogger.Object,
                 _mockSecureDataService.Object, _mockValidationService.Object);
 
             // Assert
@@ -166,7 +165,7 @@ namespace HC.TechnicalCalculators.Tests.Services
             Assert.Equal("Test News", result[0].Title);
         }
 
-        [Fact (Skip ="Work in progress")]
+        [Fact(Skip = "Work in progress")]
         public async Task GetNewsForSymbol_ShouldFilterByDateRange()
         {
             // Arrange

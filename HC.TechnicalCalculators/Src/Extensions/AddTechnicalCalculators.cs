@@ -1,9 +1,8 @@
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Configuration;
 using HC.TechnicalCalculators.Src.Interfaces;
-using HC.TechnicalCalculators.Src.Services;
-using HC.TechnicalCalculators.Src.Factory;
 using HC.TechnicalCalculators.Src.Security;
+using HC.TechnicalCalculators.Src.Services;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace HC.TechnicalCalculators.Src.Extensions
 {
@@ -23,7 +22,7 @@ namespace HC.TechnicalCalculators.Src.Extensions
             services.AddSingleton<SecureHttpClientFactory>();
 
             // Register the new DI-based calculator factory
-           // services.AddSingleton<ITechnicalCalculatorFactory, DependencyInjectionCalculatorFactory>();
+            // services.AddSingleton<ITechnicalCalculatorFactory, DependencyInjectionCalculatorFactory>();
 
             // Configure news feed options with validation
             if (configuration != null)
@@ -63,7 +62,7 @@ namespace HC.TechnicalCalculators.Src.Extensions
         /// <param name="configureOptions">Action to configure news feed options</param>
         /// <returns>The service collection for chaining</returns>
         public static IServiceCollection AddTechnicalCalculators(
-            this IServiceCollection services, 
+            this IServiceCollection services,
             Action<SecureNewsFeedOptions> configureOptions)
         {
             // Register security services

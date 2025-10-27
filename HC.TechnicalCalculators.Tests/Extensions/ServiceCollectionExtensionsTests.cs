@@ -1,11 +1,7 @@
+using HC.TechnicalCalculators.Src.Extensions;
+using HC.TechnicalCalculators.Src.Security;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using HC.TechnicalCalculators.Src.Extensions;
-using HC.TechnicalCalculators.Src.Factory;
-using HC.TechnicalCalculators.Src.Interfaces;
-using HC.TechnicalCalculators.Src.Security;
-using HC.TechnicalCalculators.Src.Services;
-using Xunit;
 
 namespace HC.TechnicalCalculators.Tests.Extensions
 {
@@ -22,12 +18,12 @@ namespace HC.TechnicalCalculators.Tests.Extensions
 
             // Assert
             var serviceProvider = services.BuildServiceProvider();
-            
+
             // Verify security services are registered
             Assert.NotNull(serviceProvider.GetService<ISecureDataService>());
             Assert.NotNull(serviceProvider.GetService<IInputValidationService>());
             Assert.NotNull(serviceProvider.GetService<SecureHttpClientFactory>());
-                        
+
             // Verify correct implementations
             Assert.IsType<SecureDataService>(serviceProvider.GetService<ISecureDataService>());
             Assert.IsType<InputValidationService>(serviceProvider.GetService<IInputValidationService>());
@@ -48,7 +44,7 @@ namespace HC.TechnicalCalculators.Tests.Extensions
             Assert.NotNull(serviceProvider.GetService<IInputValidationService>());
         }
 
-        
+
         [Fact(Skip = "Feature Not fully implemented yet!")]
         public void AddTechnicalCalculators_WithConfiguration_ShouldConfigureOptions()
         {
@@ -83,7 +79,7 @@ namespace HC.TechnicalCalculators.Tests.Extensions
 
             // Assert
             var serviceProvider = services.BuildServiceProvider();
-            
+
 
             var secureDataService1 = serviceProvider.GetService<ISecureDataService>();
             var secureDataService2 = serviceProvider.GetService<ISecureDataService>();
@@ -139,7 +135,7 @@ namespace HC.TechnicalCalculators.Tests.Extensions
 
             // Assert
             var serviceProvider = services.BuildServiceProvider();
-            
+
             // These should resolve without throwing exceptions
             Assert.NotNull(serviceProvider.GetRequiredService<IInputValidationService>());
             Assert.NotNull(serviceProvider.GetRequiredService<ISecureDataService>());

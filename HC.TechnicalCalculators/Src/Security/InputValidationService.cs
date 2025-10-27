@@ -184,7 +184,7 @@ namespace HC.TechnicalCalculators.Src.Security
         {
             if (input != null && input.Length > maxLength)
             {
-                _logger.LogError("String parameter {Parameter} length {Length} exceeds maximum {MaxLength}", 
+                _logger.LogError("String parameter {Parameter} length {Length} exceeds maximum {MaxLength}",
                     parameterName, input.Length, maxLength);
                 throw new ArgumentException($"Parameter '{parameterName}' exceeds maximum length of {maxLength} characters");
             }

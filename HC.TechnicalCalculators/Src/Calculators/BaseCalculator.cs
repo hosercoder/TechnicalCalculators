@@ -19,7 +19,7 @@ namespace HC.TechnicalCalculators.Src.Calculators
 
         private const int MAX_ARRAY_SIZE = 1000000; // 1M elements
         private const int MAX_PARAMETER_LENGTH = 100;
- 
+
         /// <summary>
         /// High prices array.
         /// </summary>
@@ -71,23 +71,23 @@ namespace HC.TechnicalCalculators.Src.Calculators
 
             foreach (var kvp in parameters)
             {
-                if(kvp.Key == nameof(ParameterNamesEnum.NA))
+                if (kvp.Key == nameof(ParameterNamesEnum.NA))
                 {
                     continue;
                 }
-                
+
                 // Enhanced parameter validation
                 if (string.IsNullOrEmpty(kvp.Key))
                 {
                     throw new ArgumentException("Parameter key cannot be null or empty.");
                 }
-                
+
                 // Validate parameter values are not null or empty
                 if (string.IsNullOrEmpty(kvp.Value))
                 {
                     throw new ArgumentException($"Parameter '{kvp.Key}' cannot be null or empty.", kvp.Key);
                 }
-                
+
                 // Validate parameter lengths to prevent buffer overflow attacks
                 ValidationService.ValidateStringLength(kvp.Key, MAX_PARAMETER_LENGTH, "parameter key");
                 ValidationService.ValidateStringLength(kvp.Value, MAX_PARAMETER_LENGTH, "parameter value");
@@ -128,19 +128,19 @@ namespace HC.TechnicalCalculators.Src.Calculators
                 {
                     throw new ArgumentNullException(nameof(prices), "Prices array cannot be null.");
                 }
-                
+
                 // Check columns before general validation for more specific error messages
                 if (prices.GetLength(1) != 6)
                 {
                     throw new ArgumentException("Prices array must have 6 columns: timestamp, open, high, low, close, volume.");
                 }
-                
+
                 // Enhanced security validation
                 if (!ValidationService.IsValidPriceData(prices))
                 {
                     throw new ArgumentException("Invalid price data provided.");
                 }
-                
+
                 ValidationService.ValidateArraySize(prices, MAX_ARRAY_SIZE);
             }
             else
@@ -170,7 +170,7 @@ namespace HC.TechnicalCalculators.Src.Calculators
         private void ParsePrices(double[,] prices)
         {
             int length = prices.GetLength(0);
-            
+
             // Initialize arrays with proper size
             High = new double[length];
             Low = new double[length];
@@ -178,7 +178,7 @@ namespace HC.TechnicalCalculators.Src.Calculators
             Volume = new double[length];
             Open = new double[length];
             Timestamp = new double[length];
-            
+
             // Securely copy data to prevent external modification
             for (int i = 0; i < length; i++)
             {

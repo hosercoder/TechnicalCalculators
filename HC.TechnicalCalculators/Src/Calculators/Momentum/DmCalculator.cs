@@ -1,4 +1,3 @@
-using HC.TechnicalCalculators.Src.Calculators;
 using HC.TechnicalCalculators.Src.Models;
 using TALib;
 
@@ -56,9 +55,9 @@ namespace HC.TechnicalCalculators.Src.Calculators.Momentum
         }
         public static IReadOnlyList<string> GetTechnicalIndicatorNames()
         {
-            return new string[] { 
-                nameof(TechnicalNamesEnum.PLUSDM), 
-                nameof(TechnicalNamesEnum.MINUSDM) 
+            return new string[] {
+                nameof(TechnicalNamesEnum.PLUSDM),
+                nameof(TechnicalNamesEnum.MINUSDM)
             };
         }
         public static Dictionary<string, (double Min, double Max, ParameterValueTypeEnum valueType)> GetParameterConstraints()

@@ -1,16 +1,3 @@
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Moq;
-using HC.TechnicalCalculators.Src.Calculators.Momentum;
-using HC.TechnicalCalculators.Src.Calculators.Overlap;
-using HC.TechnicalCalculators.Src.Calculators.Price;
-using HC.TechnicalCalculators.Src.Calculators.Volume;
-using HC.TechnicalCalculators.Src.Factory;
-using HC.TechnicalCalculators.Src.Interfaces;
-using HC.TechnicalCalculators.Src.Models;
-using HC.TechnicalCalculators.Src.Security;
-using Xunit;
-
 namespace HC.TechnicalCalculators.Tests.Factory
 {
     public class DependencyInjectionCalculatorFactoryTests //: IDisposable

@@ -9,7 +9,7 @@ namespace HC.TechnicalCalculators.Tests.Calculators.Overlap
         [Fact]
         public void Constructor_ShouldThrowArgumentException_WhenPeriodIsNotProvided()
         {
-            var parameters = new Dictionary<string, string> { 
+            var parameters = new Dictionary<string, string> {
                 { nameof(ParameterNamesEnum.Multiplier), "2" } };
             // Arrange
 
@@ -143,8 +143,8 @@ namespace HC.TechnicalCalculators.Tests.Calculators.Overlap
         public void Calculate_ShouldHandleNullPrices()
         {
             // Arrange
-            var parameters = new Dictionary<string, string> { { 
-                    nameof(ParameterNamesEnum.Period), "20" }, 
+            var parameters = new Dictionary<string, string> { {
+                    nameof(ParameterNamesEnum.Period), "20" },
                 { nameof(ParameterNamesEnum.Multiplier), "2" } };
 
 

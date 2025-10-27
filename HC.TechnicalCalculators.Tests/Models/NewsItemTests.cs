@@ -1,6 +1,5 @@
-using System.ComponentModel.DataAnnotations;
 using HC.TechnicalCalculators.Src.Models;
-using Xunit;
+using System.ComponentModel.DataAnnotations;
 
 namespace HC.TechnicalCalculators.Tests.Models
 {
@@ -22,17 +21,17 @@ namespace HC.TechnicalCalculators.Tests.Models
             Assert.Equal(default(DateTime), newsItem.PublishedAt);
             Assert.Empty(newsItem.RelatedSymbols);
             Assert.Equal(0.0, newsItem.SentimentScore);
-           // Assert.Equal(0.0, newsItem.Relevance);
-           // Assert.Empty(newsItem.Categories);
+            // Assert.Equal(0.0, newsItem.Relevance);
+            // Assert.Empty(newsItem.Categories);
             Assert.Empty(newsItem.Keywords);
             Assert.Null(newsItem.Language);
-          //  Assert.Null(newsItem.Region);
-          //  Assert.Equal(0, newsItem.ViewCount);
-         //   Assert.Equal(0, newsItem.ShareCount);
-         //   Assert.False(newsItem.IsBreaking);
-        //    Assert.False(newsItem.IsPremium);
-        //    Assert.Equal(default(DateTime), newsItem.CreatedAt);
-        //    Assert.Equal(default(DateTime), newsItem.UpdatedAt);
+            //  Assert.Null(newsItem.Region);
+            //  Assert.Equal(0, newsItem.ViewCount);
+            //   Assert.Equal(0, newsItem.ShareCount);
+            //   Assert.False(newsItem.IsBreaking);
+            //    Assert.False(newsItem.IsPremium);
+            //    Assert.Equal(default(DateTime), newsItem.CreatedAt);
+            //    Assert.Equal(default(DateTime), newsItem.UpdatedAt);
         }
 
         [Fact(Skip = "Work in progress")]
@@ -55,17 +54,17 @@ namespace HC.TechnicalCalculators.Tests.Models
             newsItem.PublishedAt = testDate;
             newsItem.RelatedSymbols = relatedSymbols;
             newsItem.SentimentScore = 0.75;
-          //  newsItem.Relevance = 0.9;
-         //  newsItem.Categories = categories;
+            //  newsItem.Relevance = 0.9;
+            //  newsItem.Categories = categories;
             newsItem.Keywords = keywords;
             newsItem.Language = "en";
-         //   newsItem.Region = "US";
-         //   newsItem.ViewCount = 1000;
-         //   newsItem.ShareCount = 50;
-         //   newsItem.IsBreaking = true;
-         //   newsItem.IsPremium = true;
-         //   newsItem.CreatedAt = testDate;
-         //   newsItem.UpdatedAt = testDate.AddMinutes(5);
+            //   newsItem.Region = "US";
+            //   newsItem.ViewCount = 1000;
+            //   newsItem.ShareCount = 50;
+            //   newsItem.IsBreaking = true;
+            //   newsItem.IsPremium = true;
+            //   newsItem.CreatedAt = testDate;
+            //   newsItem.UpdatedAt = testDate.AddMinutes(5);
 
             // Assert
             Assert.Equal("test-id-123", newsItem.Id);
@@ -77,17 +76,17 @@ namespace HC.TechnicalCalculators.Tests.Models
             Assert.Equal(testDate, newsItem.PublishedAt);
             Assert.Equal(relatedSymbols, newsItem.RelatedSymbols);
             Assert.Equal(0.75, newsItem.SentimentScore);
-         //   Assert.Equal(0.9, newsItem.Relevance);
-         //   Assert.Equal(categories, newsItem.Categories);
+            //   Assert.Equal(0.9, newsItem.Relevance);
+            //   Assert.Equal(categories, newsItem.Categories);
             Assert.Equal(keywords, newsItem.Keywords);
             Assert.Equal("en", newsItem.Language);
-         //   Assert.Equal("US", newsItem.Region);
-         //   Assert.Equal(1000, newsItem.ViewCount);
-        //    Assert.Equal(50, newsItem.ShareCount);
-        //    Assert.True(newsItem.IsBreaking);
-        //   Assert.True(newsItem.IsPremium);
-         //   Assert.Equal(testDate, newsItem.CreatedAt);
-         //   Assert.Equal(testDate.AddMinutes(5), newsItem.UpdatedAt);
+            //   Assert.Equal("US", newsItem.Region);
+            //   Assert.Equal(1000, newsItem.ViewCount);
+            //    Assert.Equal(50, newsItem.ShareCount);
+            //    Assert.True(newsItem.IsBreaking);
+            //   Assert.True(newsItem.IsPremium);
+            //   Assert.Equal(testDate, newsItem.CreatedAt);
+            //   Assert.Equal(testDate.AddMinutes(5), newsItem.UpdatedAt);
         }
 
         [Fact(Skip = "Work in progress")]
@@ -176,9 +175,9 @@ namespace HC.TechnicalCalculators.Tests.Models
                 Author = "Valid Author",
                 PublishedAt = DateTime.UtcNow,
                 SentimentScore = 0.5,
-             //   Relevance = 0.8,
+                //   Relevance = 0.8,
                 Language = "en",
-             //   Region = "US"
+                //   Region = "US"
             };
 
             var validationContext = new ValidationContext(newsItem);
@@ -217,8 +216,8 @@ namespace HC.TechnicalCalculators.Tests.Models
             // Assert
             Assert.NotNull(newsItem.RelatedSymbols);
             Assert.Empty(newsItem.RelatedSymbols);
-          //  Assert.NotNull(newsItem.Categories);
-          //  Assert.Empty(newsItem.Categories);
+            //  Assert.NotNull(newsItem.Categories);
+            //  Assert.Empty(newsItem.Categories);
             Assert.NotNull(newsItem.Keywords);
             Assert.Empty(newsItem.Keywords);
         }
@@ -231,14 +230,14 @@ namespace HC.TechnicalCalculators.Tests.Models
 
             // Act
             newsItem.RelatedSymbols.Add("AAPL");
-          //  newsItem.Categories.Add("Technology");
+            //  newsItem.Categories.Add("Technology");
             newsItem.Keywords.Add("iPhone");
 
             // Assert
             Assert.Single(newsItem.RelatedSymbols);
             Assert.Contains("AAPL", newsItem.RelatedSymbols);
-        //    Assert.Single(newsItem.Categories);
-        //    Assert.Contains("Technology", newsItem.Categories);
+            //    Assert.Single(newsItem.Categories);
+            //    Assert.Contains("Technology", newsItem.Categories);
             Assert.Single(newsItem.Keywords);
             Assert.Contains("iPhone", newsItem.Keywords);
         }
@@ -247,10 +246,10 @@ namespace HC.TechnicalCalculators.Tests.Models
         public void ViewCount_ShouldAcceptNonNegativeValues()
         {
             // Arrange & Act
-           // var newsItem = new NewsItem { ViewCount = viewCount };
+            // var newsItem = new NewsItem { ViewCount = viewCount };
 
             // Assert
-          //  Assert.Equal(viewCount, newsItem.ViewCount);
+            //  Assert.Equal(viewCount, newsItem.ViewCount);
         }
 
 
@@ -258,10 +257,10 @@ namespace HC.TechnicalCalculators.Tests.Models
         public void ShareCount_ShouldAcceptNonNegativeValues()
         {
             // Arrange & Act
-          //  var newsItem = new NewsItem { ShareCount = shareCount };
+            //  var newsItem = new NewsItem { ShareCount = shareCount };
 
             // Assert
-          //  Assert.Equal(shareCount, newsItem.ShareCount);
+            //  Assert.Equal(shareCount, newsItem.ShareCount);
         }
     }
 }

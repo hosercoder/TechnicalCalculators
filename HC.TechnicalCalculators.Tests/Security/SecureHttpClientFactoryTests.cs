@@ -1,11 +1,7 @@
+using HC.TechnicalCalculators.Src.Security;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
-using HC.TechnicalCalculators.Src.Security;
-using System.Net.Security;
-using System.Security.Authentication;
-using System.Security.Cryptography.X509Certificates;
-using Xunit;
 
 namespace HC.TechnicalCalculators.Tests.Security
 {
@@ -20,7 +16,7 @@ namespace HC.TechnicalCalculators.Tests.Security
         {
             _mockLogger = new Mock<ILogger<SecureHttpClientFactory>>();
             _mockOptions = new Mock<IOptions<SecureNewsFeedOptions>>();
-            
+
             _options = new SecureNewsFeedOptions
             {
                 ApiKey = "test-api-key",
@@ -53,7 +49,7 @@ namespace HC.TechnicalCalculators.Tests.Security
         public void Constructor_WithNullLogger_ShouldThrowArgumentNullException()
         {
             // Act & Assert
-            var exception = Assert.Throws<ArgumentNullException>(() => 
+            var exception = Assert.Throws<ArgumentNullException>(() =>
                 new SecureHttpClientFactory(null!, _mockOptions.Object));
             Assert.Equal("Logger Can not be null", exception.ParamName);
         }
@@ -62,7 +58,7 @@ namespace HC.TechnicalCalculators.Tests.Security
         public void Constructor_WithNullOptions_ShouldThrowArgumentNullException()
         {
             // Act & Assert
-            var exception = Assert.Throws<ArgumentNullException>(() => 
+            var exception = Assert.Throws<ArgumentNullException>(() =>
                 new SecureHttpClientFactory(_mockLogger.Object, null!));
             Assert.Contains("Options Can not be null", exception.Message);
         }
@@ -76,12 +72,12 @@ namespace HC.TechnicalCalculators.Tests.Security
             // Assert
             Assert.NotNull(client);
             Assert.Equal(TimeSpan.FromSeconds(_options.TimeoutSeconds), client.Timeout);
-            
+
             // Check headers
             Assert.True(client.DefaultRequestHeaders.Contains("User-Agent"));
             Assert.True(client.DefaultRequestHeaders.Contains("Accept"));
             Assert.True(client.DefaultRequestHeaders.Contains("Cache-Control"));
-            
+
             Assert.Equal("HC-TechnicalCalculators/1.0.0", client.DefaultRequestHeaders.UserAgent.ToString());
             Assert.Equal("application/json", client.DefaultRequestHeaders.Accept.ToString());
             Assert.Equal("no-cache", client.DefaultRequestHeaders.CacheControl.ToString());
@@ -109,7 +105,7 @@ namespace HC.TechnicalCalculators.Tests.Security
             _options.NewsApiEndpoint = "http://insecure.api.com";
 
             // Act & Assert
-            var exception = Assert.Throws<InvalidOperationException>(() => 
+            var exception = Assert.Throws<InvalidOperationException>(() =>
                 _factory.CreateSecureClient());
             Assert.Contains("HTTPS is required but endpoint URL is not secure", exception.Message);
         }
@@ -166,7 +162,7 @@ namespace HC.TechnicalCalculators.Tests.Security
 
             // Assert
             Assert.NotNull(client);
-            
+
             // Verify the handler is properly configured (we can't directly access it, but we can check the client works)
             Assert.True(client.Timeout > TimeSpan.Zero);
         }
@@ -176,11 +172,11 @@ namespace HC.TechnicalCalculators.Tests.Security
         {
             // Arrange
             _options.ValidateCertificates = false;
-            
+
             // We need to create a scenario where certificate validation would be called
             // This is difficult to test directly without making actual HTTPS calls
             // But we can verify the configuration is set up correctly
-            
+
             // Act
             var client = _factory.CreateSecureClient();
 
@@ -217,7 +213,7 @@ namespace HC.TechnicalCalculators.Tests.Security
             _options.RequireHttps = true;
 
             // Act & Assert
-            var exception = Assert.Throws<InvalidOperationException>(() => 
+            var exception = Assert.Throws<InvalidOperationException>(() =>
                 _factory.CreateSecureClient());
             Assert.Contains("HTTPS is required but endpoint URL is not secure", exception.Message);
         }
@@ -232,7 +228,7 @@ namespace HC.TechnicalCalculators.Tests.Security
             // Should have exactly the headers we set (User-Agent, Accept, Cache-Control)
             var headerCount = client.DefaultRequestHeaders.Count();
             Assert.True(headerCount >= 3); // At least our 3 headers
-            
+
             Assert.True(client.DefaultRequestHeaders.Contains("User-Agent"));
             Assert.True(client.DefaultRequestHeaders.Contains("Accept"));
             Assert.True(client.DefaultRequestHeaders.Contains("Cache-Control"));
@@ -285,7 +281,7 @@ namespace HC.TechnicalCalculators.Tests.Security
             _options.RequireHttps = true;
 
             // Act & Assert
-            var exception = Assert.Throws<InvalidOperationException>(() => 
+            var exception = Assert.Throws<InvalidOperationException>(() =>
                 _factory.CreateSecureClient());
             Assert.Contains("HTTPS is required but endpoint URL is not secure.", exception.Message);
         }
@@ -298,7 +294,7 @@ namespace HC.TechnicalCalculators.Tests.Security
             _options.RequireHttps = true;
 
             // Act & Assert
-            var exception = Assert.Throws<InvalidOperationException>(() => 
+            var exception = Assert.Throws<InvalidOperationException>(() =>
                 _factory.CreateSecureClient());
             Assert.Contains("HTTPS is required but endpoint URL is not secure.", exception.Message);
         }

@@ -1,9 +1,7 @@
-using Microsoft.Extensions.DependencyInjection;
 using HC.TechnicalCalculators.Src.Calculators.Momentum;
 using HC.TechnicalCalculators.Src.Calculators.News;
 using HC.TechnicalCalculators.Src.Calculators.Overlap;
 using HC.TechnicalCalculators.Src.Calculators.Price;
-using HC.TechnicalCalculators.Src.Calculators.Statistics;
 using HC.TechnicalCalculators.Src.Calculators.Volatility;
 using HC.TechnicalCalculators.Src.Calculators.Volume;
 using HC.TechnicalCalculators.Src.Interfaces;
@@ -17,7 +15,7 @@ namespace HC.TechnicalCalculators.Src.Factory
     /// </summary>
     public static class CalculatorFactory
     {
-        public static ITechnicalCalculator CreateCalculator(CalculatorNameEnum calculatorType, Dictionary<string, string> parameters, 
+        public static ITechnicalCalculator CreateCalculator(CalculatorNameEnum calculatorType, Dictionary<string, string> parameters,
             string name, IInputValidationService validationService)
         {
             if (parameters == null)

@@ -1,6 +1,5 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using System.Net;
 using System.Net.Security;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
@@ -17,7 +16,7 @@ namespace HC.TechnicalCalculators.Src.Security
             IOptions<SecureNewsFeedOptions> options)
         {
             _logger = logger ?? throw new ArgumentNullException("Logger Can not be null");
-            if(options == null)
+            if (options == null)
             {
                 throw new ArgumentNullException(nameof(options), "Options Can not be null");
             }
